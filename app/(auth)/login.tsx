@@ -9,7 +9,7 @@ import {
 import { Link, useRouter, Stack } from "expo-router";
 import React, { useState } from "react";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // ✅ Import added
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -23,36 +23,44 @@ export default function LoginScreen() {
     }
 
     try {
-      const API_URL = "http://10.0.2.2:5000/api/users/login"; // Android emulator
+      const API_URL = "http://10.0.2.2:3000/api/users/login";
       const response = await axios.post(API_URL, { email, password });
 
-      if (response.status === 200) {
-        const token = response.data?.token ?? "true";
-        const userEmail = response.data?.email ?? email;
-        console.log(response.data);
-        
+      if (response.status === 200 || response.status === 201) {
+        const token = response.data?.access_token;
+
+        const role = response.data?.role;
+        const userEmail = email; // We can just use the email we already have
+
+        if (!token || !role) {
+          Alert.alert("Error", "Login succeeded but no token or role was received.");
+          return;
+        }
+
+        console.log("Token received:", token);
+
         await AsyncStorage.setItem("userToken", String(token));
         await AsyncStorage.setItem("userEmail", String(userEmail));
+        await AsyncStorage.setItem("userRole", String(role));
 
         Alert.alert("Success", "Login successful!");
         router.replace("/"); // go to home
       } else {
+        // This part is fine, but likely won't be hit now
         Alert.alert("Error", "Invalid credentials");
       }
     } catch (error: any) {
       console.error("Login Error:", error);
 
-      // If backend returned a response with JSON error message
       if (error.response && error.response.data) {
         const message =
-          error.response.data.error ||
           error.response.data.message ||
+          error.response.data.error ||
           "Login failed";
         Alert.alert("Error", message);
         return;
       }
 
-      // Network or unexpected error
       Alert.alert("Error", "Could not connect to server");
     }
   };

@@ -20,14 +20,14 @@ import { Picker } from "@react-native-picker/picker";
  * On Android emulator use 10.0.2.2; on local device or Expo Go use appropriate IP.
  */
 
-const API_URL = "http://10.0.2.2:5000/api/users";
+const API_URL = "http://10.0.2.2:3000/api/users";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("general_public");
+  const [role, setRole] = useState("general public");
   const [country, setCountry] = useState("");
 
   const handleRegister = async () => {
@@ -87,9 +87,9 @@ export default function RegisterScreen() {
           style={styles.picker}
           mode="dropdown"
         >
-          <Picker.Item label="Admin" value="admin" />
-          <Picker.Item label="General Public" value="general_public" />
-          <Picker.Item label="Medical Officer" value="medical_officer" />
+          {/* <Picker.Item label="Admin" value="admin" /> */}
+          <Picker.Item label="General Public" value="general public" />
+          <Picker.Item label="Medical Officer" value="medical officer" />
           <Picker.Item label="Epidemiologist" value="epidemiologist" />
         </Picker>
       </View>
