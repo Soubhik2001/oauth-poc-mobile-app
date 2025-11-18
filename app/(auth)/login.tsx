@@ -11,6 +11,12 @@ import React, { useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const CLIENT_ID = 'my-client-id';
+const CLIENT_SECRET = 'my-client-secret';
+const REDIRECT_URI = 'http://localhost/callback'; // Mock URI for native app
+
+const API_URL = "http://10.0.2.2:3000"; // Base URL
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,34 +29,40 @@ export default function LoginScreen() {
     }
 
     try {
-      const API_URL = "http://10.0.2.2:3000/api/users/login";
-      const response = await axios.post(API_URL, { email, password });
+      const authResponse = await axios.post(`${API_URL}/oauth/authorize`, {
+        email: email,
+        password: password,
+        client_id: CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+      });
 
-      if (response.status === 200 || response.status === 201) {
-        const token = response.data?.access_token;
-
-        const role = response.data?.role;
-        const userEmail = email; // We can just use the email we already have
-
-        if (!token || !role) {
-          Alert.alert("Error", "Login succeeded but no token or role was received.");
-          return;
-        }
-
-        console.log("Token received:", token);
-
-        await AsyncStorage.setItem("userToken", String(token));
-        await AsyncStorage.setItem("userEmail", String(userEmail));
-        await AsyncStorage.setItem("userRole", String(role));
-
-        Alert.alert("Success", "Login successful!");
-        router.replace("/"); // go to home
-      } else {
-        // This part is fine, but likely won't be hit now
-        Alert.alert("Error", "Invalid credentials");
+      const { code } = authResponse.data;
+      if (!code) {
+        throw new Error("No authorization code received.");
       }
+
+      const tokenResponse = await axios.post(`${API_URL}/oauth/token`, {
+        grant_type: "authorization_code",
+        code: code,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+      });
+
+      const { access_token, role } = tokenResponse.data;
+
+      if (!access_token || !role) {
+        throw new Error("Login succeeded but no token or role was received.");
+      }
+
+      await AsyncStorage.setItem("userToken", String(access_token));
+      await AsyncStorage.setItem("userEmail", String(email));
+      await AsyncStorage.setItem("userRole", String(role));
+
+      Alert.alert("Success", "Login successful!");
+      router.replace("/"); // go to home
     } catch (error: any) {
-      console.error("Login Error:", error);
+      console.error("Login Error:", error.response?.data || error.message);
 
       if (error.response && error.response.data) {
         const message =
