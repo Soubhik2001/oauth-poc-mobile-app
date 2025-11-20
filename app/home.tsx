@@ -40,7 +40,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {userRole === "superadmin" && (
+        {/* {userRole === "superadmin" && (
           <View style={styles.adminContainer}>
             <TouchableOpacity
               style={[styles.button, styles.dashboardButton]}
@@ -56,7 +56,7 @@ export default function HomeScreen() {
               <Text style={styles.buttonTextLight}>Create New User</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )} */}
       </View>
 
       <View style={styles.footer}>
