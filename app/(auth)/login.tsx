@@ -6,20 +6,22 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { Link, useRouter, Stack } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 
-const CLIENT_ID = 'my-client-id';
-const CLIENT_SECRET = 'my-client-secret';
-const REDIRECT_URI = 'http://localhost/callback'; // Mock URI for native app
+const CLIENT_ID = "my-client-id";
+const CLIENT_SECRET = "my-client-secret";
+const REDIRECT_URI = "http://localhost/callback";
 
-const API_URL = "http://10.0.2.2:3000"; // Base URL
+const API_URL = "http://10.0.2.2:3000";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -60,7 +62,7 @@ export default function LoginScreen() {
       await AsyncStorage.setItem("userRole", String(role));
 
       Alert.alert("Success", "Login successful!");
-      router.replace("/"); // go to home
+      router.replace("/");
     } catch (error: any) {
       console.error("Login Error:", error.response?.data || error.message);
 
@@ -89,14 +91,26 @@ export default function LoginScreen() {
         onChangeText={setEmail}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#aaa"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.passwordInput}
+          placeholder="Password"
+          placeholderTextColor="#aaa"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.eyeIcon}
+        >
+          <Ionicons
+            name={showPassword ? "eye" : "eye-off"}
+            size={24}
+            color="#aaa"
+          />
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
@@ -118,6 +132,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 30 },
+
   input: {
     width: "100%",
     height: 50,
@@ -127,6 +142,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
   },
+
+  passwordContainer: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    marginBottom: 15,
+  },
+
+  passwordInput: {
+    flex: 1,
+    height: "100%",
+    color: "#000",
+  },
+
+  eyeIcon: {
+    marginLeft: 10,
+  },
+
   button: {
     backgroundColor: "#007AFF",
     paddingVertical: 15,

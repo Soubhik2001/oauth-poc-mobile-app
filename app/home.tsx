@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import TaskFollowUp from "../components/TaskFollowUp";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check the user's role when the screen loads
     const fetchRole = async () => {
       const role = await AsyncStorage.getItem("userRole");
       setUserRole(role);
@@ -18,7 +25,7 @@ export default function HomeScreen() {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.clear(); // Clear all user data
+      await AsyncStorage.clear();
       router.replace("/(auth)/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -27,8 +34,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.header}>
         <Text style={styles.title}>Welcome Home!</Text>
 
         <View style={styles.roleBadge}>
@@ -39,24 +50,11 @@ export default function HomeScreen() {
             </Text>
           </Text>
         </View>
+      </View>
 
-        {/* {userRole === "superadmin" && (
-          <View style={styles.adminContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.dashboardButton]}
-              onPress={() => router.push("/admin")}
-            >
-              <Text style={styles.buttonTextDark}>Go to Admin Dashboard</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.createUserButton]}
-              onPress={() => router.push("/admin/create_user")}
-            >
-              <Text style={styles.buttonTextLight}>Create New User</Text>
-            </TouchableOpacity>
-          </View>
-        )} */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Application Status</Text>
+        <TaskFollowUp />
       </View>
 
       <View style={styles.footer}>
@@ -67,7 +65,7 @@ export default function HomeScreen() {
           <Text style={styles.buttonTextLight}>Logout</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -75,19 +73,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
-    padding: 20,
   },
-  content: {
-    flex: 1,
-    justifyContent: "center",
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  header: {
     alignItems: "center",
-    width: "100%",
+    marginBottom: 20,
+    marginTop: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: "800",
     color: "#1a1a1a",
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: "center",
   },
   roleBadge: {
@@ -95,16 +95,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    marginBottom: 40,
   },
   roleText: {
     fontSize: 16,
     color: "#495057",
   },
-  adminContainer: {
+
+  section: {
     width: "100%",
-    gap: 15,
+    marginBottom: 20,
   },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 15,
+    marginLeft: 5,
+  },
+
   button: {
     width: "100%",
     paddingVertical: 16,
@@ -117,28 +125,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  dashboardButton: {
-    backgroundColor: "#FFC107", // Amber
-  },
-  createUserButton: {
-    backgroundColor: "#2196F3", // Blue
-  },
   logoutButton: {
-    backgroundColor: "#FF3B30", // Red
-    marginTop: 20,
+    backgroundColor: "#FF3B30",
+    marginTop: 10,
   },
   buttonTextLight: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
   },
-  buttonTextDark: {
-    color: "#333333",
-    fontSize: 16,
-    fontWeight: "700",
-  },
   footer: {
     width: "100%",
-    marginBottom: 20,
+    marginTop: 20,
   },
 });
