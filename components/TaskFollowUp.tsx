@@ -11,8 +11,9 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { BASE_URL } from "@/app/config";
 
-const API_URL = "http://10.0.2.2:3000";
+const API_URL = BASE_URL;
 
 const AVAILABLE_ROLES = [
   { label: "Medical Officer", value: "medical officer" },

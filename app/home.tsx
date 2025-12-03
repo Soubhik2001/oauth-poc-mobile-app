@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,21 +6,43 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TaskFollowUp from "../components/TaskFollowUp";
+import { fetchUserLocationState } from "./services/location";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  const [locationState, setLocationState] = useState<string>("Locating...");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = async () => {
+    // Fetch Role
+    const role = await AsyncStorage.getItem("userRole");
+    setUserRole(role);
+
+    // Fetch Location
+    console.log("UI: Fetching Location...");
+    setLocationState("Updating...");
+
+    const locationResult = await fetchUserLocationState();
+
+    console.log("UI: Got Location:", locationResult);
+    setLocationState(locationResult);
+  };
+
   useEffect(() => {
-    const fetchRole = async () => {
-      const role = await AsyncStorage.getItem("userRole");
-      setUserRole(role);
-    };
-    fetchRole();
+    loadData();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
   }, []);
 
   const handleLogout = async () => {
@@ -29,7 +51,6 @@ export default function HomeScreen() {
       router.replace("/(auth)/login");
     } catch (error) {
       console.error("Logout error:", error);
-      Alert.alert("Error", "Something went wrong while logging out.");
     }
   };
 
@@ -38,17 +59,27 @@ export default function HomeScreen() {
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={styles.header}>
         <Text style={styles.title}>Welcome Home!</Text>
 
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>
-            Role:{" "}
-            <Text style={{ fontWeight: "bold" }}>
-              {userRole || "Loading..."}
+        <View style={styles.infoRow}>
+          {/* Role Badge */}
+          <View style={styles.badge}>
+            <Text style={styles.badgeLabel}>Role</Text>
+            <Text style={styles.badgeValue}>{userRole || "..."}</Text>
+          </View>
+
+          {/* Location Badge */}
+          <View style={[styles.badge, styles.locationBadge]}>
+            <Text style={styles.badgeLabel}>Location</Text>
+            <Text style={[styles.badgeValue, { color: "#000" }]}>
+              {locationState}
             </Text>
-          </Text>
+          </View>
         </View>
       </View>
 
@@ -87,23 +118,46 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     color: "#1a1a1a",
-    marginBottom: 10,
+    marginBottom: 20,
     textAlign: "center",
   },
-  roleBadge: {
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+    flexWrap: "wrap",
+  },
+  badge: {
     backgroundColor: "#e9ecef",
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    minWidth: 100,
   },
-  roleText: {
+  locationBadge: {
+    backgroundColor: "#e3f2fd",
+    borderWidth: 1,
+    borderColor: "#90caf9",
+  },
+  badgeLabel: {
+    fontSize: 12,
+    color: "#888",
+    textTransform: "uppercase",
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  badgeValue: {
     fontSize: 16,
-    color: "#495057",
+    color: "#333",
+    fontWeight: "bold",
+    textAlign: "center",
   },
-
   section: {
     width: "100%",
     marginBottom: 20,
+    marginTop: 10,
   },
   sectionTitle: {
     fontSize: 20,
@@ -112,17 +166,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginLeft: 5,
   },
-
   button: {
     width: "100%",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
   },
   logoutButton: {

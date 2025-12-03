@@ -11,12 +11,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import { BASE_URL } from "../config";
 
 const CLIENT_ID = "my-client-id";
 const CLIENT_SECRET = "my-client-secret";
 const REDIRECT_URI = "http://localhost/callback";
 
-const API_URL = "http://10.0.2.2:3000";
+const API_URL = BASE_URL;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");

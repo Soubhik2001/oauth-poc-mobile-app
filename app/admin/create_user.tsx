@@ -12,8 +12,9 @@ import axios from "axios";
 import { useRouter, Stack } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../config";
 
-const API_URL = "http://10.0.2.2:3000/api/users";
+const API_URL = `${BASE_URL}/api/users`;
 
 export default function CreateUserScreen() {
   const router = useRouter();

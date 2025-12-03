@@ -14,8 +14,9 @@ import axios from "axios";
 import { useRouter, Link } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
+import { BASE_URL } from "../config";
 
-const API_URL = "http://10.0.2.2:3000/api/users";
+const API_URL = `${BASE_URL}/api/users`;
 
 export default function RegisterScreen() {
   const router = useRouter();

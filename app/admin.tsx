@@ -13,8 +13,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, Stack } from "expo-router";
+import { BASE_URL } from "./config";
 
-const API_URL = "http://10.0.2.2:3000";
+const API_URL = BASE_URL;
 const TASKS_URL = `${API_URL}/tasks`;
 const UPLOADS_URL = `${API_URL}/uploads`;
 
