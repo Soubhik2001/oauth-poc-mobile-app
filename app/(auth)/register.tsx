@@ -22,7 +22,6 @@ export default function RegisterScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [role, setRole] = useState("general public");
   const [country, setCountry] = useState("");
   const [documents, setDocuments] = useState<
@@ -51,7 +50,7 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    if (!name || !email || !password || !role || !country) {
+    if (!name || !email || !role || !country) {
       Alert.alert("Validation", "Please fill all fields.");
       return;
     }
@@ -70,7 +69,6 @@ export default function RegisterScreen() {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
-    formData.append("password", password);
     formData.append("role", role);
     formData.append("country", country);
 
@@ -83,28 +81,19 @@ export default function RegisterScreen() {
     });
 
     try {
-      Alert.alert(
-        "Uploading...",
-        "Registering your account. This may take a moment."
-      );
+      Alert.alert("Wait", "Generating secure invite link...");
 
-      const res = await axios.post(`${API_URL}/register`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      await axios.post(`${API_URL}/register`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      Alert.alert("Registered", res.data.message || "Registration successful!");
-      router.replace("/(auth)/login");
-    } catch (err: any) {
-      console.error(
-        "Register error:",
-        err?.response?.data ?? err.message ?? err
+      Alert.alert(
+        "Success",
+        "Registration initiated! Check your email to set your password and activate your account.",
+        [{ text: "OK", onPress: () => router.replace("/(auth)/login") }]
       );
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Registration failed";
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Registration failed";
       Alert.alert("Error", String(msg));
     }
   };
@@ -125,14 +114,9 @@ export default function RegisterScreen() {
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+
       <TextInput
         style={styles.input}
         placeholder="Country"
@@ -153,11 +137,10 @@ export default function RegisterScreen() {
         </Picker>
       </View>
 
-      {/* --- Conditional UI for file picking --- */}
       {(role === "epidemiologist" || role === "medical officer") && (
         <View style={styles.docContainer}>
           <Text style={styles.docHeader}>
-            Identity Documents (PDF, PNG, JPG, JPEG)
+            Identity Documents (PDF, PNG, JPG)
           </Text>
           <Button title="Select Documents" onPress={pickDocuments} />
           {documents.map((doc) => (
@@ -230,8 +213,8 @@ const styles = StyleSheet.create({
   buttonText: { color: "white", fontWeight: "600" },
   link: {
     marginTop: 16,
-    textAlign: "center", // Use text align instead of align items
-    color: "#007AFF", // Added color from your login screen
+    textAlign: "center",
+    color: "#007AFF",
   },
   docContainer: {
     width: "100%",
@@ -241,17 +224,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
   },
-  docHeader: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  docName: {
-    fontSize: 14,
-    color: "#333",
-    marginTop: 5,
-    flex: 1,
-  },
+  docHeader: { fontSize: 16, fontWeight: "bold", marginBottom: 10 },
+  docName: { fontSize: 14, color: "#333", marginTop: 5, flex: 1 },
   docRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -270,9 +244,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  removeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
+  removeButtonText: { color: "white", fontWeight: "bold", fontSize: 12 },
 });

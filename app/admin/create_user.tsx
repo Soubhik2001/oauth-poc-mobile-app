@@ -20,29 +20,25 @@ export default function CreateUserScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
   const [role, setRole] = useState("general public");
 
   const handleCreate = async () => {
-    if (!name || !email || !password || !role) {
-      Alert.alert("Error", "Please fill in all required fields.");
+    if (!name || !email || !role) {
+      Alert.alert("Error", "Name, Email, and Role are required.");
       return;
     }
 
     try {
       const token = await AsyncStorage.getItem("userToken");
-      
-      // Call the new Admin Endpoint
       await axios.post(
-        API_URL, 
-        { name, email, password, country, role },
+        API_URL,
+        { name, email, country, role },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert("Success", "User created successfully!");
-      router.back(); // Go back to dashboard
-      
+      Alert.alert("Success", "Invitation sent to user's email.");
+      router.back();
     } catch (err: any) {
       const msg = err?.response?.data?.message || "Creation failed";
       Alert.alert("Error", String(msg));
@@ -51,19 +47,27 @@ export default function CreateUserScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Stack.Screen options={{ title: "Create New User" }} />
-      
+      <Stack.Screen options={{ title: "Invite New User" }} />
+
       <Text style={styles.label}>Name</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
-      
+
       <Text style={styles.label}>Email</Text>
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} autoCapitalize="none" />
-      
-      <Text style={styles.label}>Password</Text>
-      <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
-      
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+
+
       <Text style={styles.label}>Country</Text>
-      <TextInput style={styles.input} value={country} onChangeText={setCountry} />
+      <TextInput
+        style={styles.input}
+        value={country}
+        onChangeText={setCountry}
+      />
 
       <Text style={styles.label}>Role</Text>
       <View style={styles.pickerWrap}>
@@ -81,7 +85,7 @@ export default function CreateUserScreen() {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleCreate}>
-        <Text style={styles.buttonText}>Create User</Text>
+        <Text style={styles.buttonText}>Send Invitation</Text>
       </TouchableOpacity>
     </ScrollView>
   );
